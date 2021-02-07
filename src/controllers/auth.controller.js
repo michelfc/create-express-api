@@ -7,9 +7,8 @@ async function login(req, res, next) {
   if (validation.errors.length > 0) {
     res.status(400);
     next(validation);
-  }
-  else {
-    let jwt = jwtService.sign({ email: req.body.email });
+  } else {
+    const jwt = jwtService.sign({ email: req.body.email });
     res.json({ jwt });
   }
 }

@@ -1,26 +1,26 @@
 const fs = require('fs');
-const randtoken = require('rand-token');
+const path = require('path');
 const expressJwt = require('express-jwt');
 const jwtGenerator = require('jsonwebtoken');
-const cryptoService = require('../services/crypto.service');
-const privateKey = fs.readFileSync('./src/keys/private.key');
-const publicKey = fs.readFileSync('./src/keys/public.key');
-const expirationTime = process.env.JWT_EXPIRATION_TIME;
+const { decrypt, encrypt, generateToken } = require('./crypto.service');
 
-function generateToken() {
-  return randtoken.uid(256);
-}
+const keyPath = process.env.KEYS_PATH;
+const privKeyFile = path.join(keyPath, process.env.KEYS_PRIVATE_FILE);
+const publKeyFile = path.join(keyPath, process.env.KEYS_PUBLIC_FILE);
+
+const privateKey = fs.readFileSync(privKeyFile);
+const publicKey = fs.readFileSync(publKeyFile);
+const expirationTime = process.env.JWT_EXPIRATION_TIME;
 
 const jwtService = {
   generateToken,
 
-  getCurrentUserData: (req) => {
-    return JSON.parse(cryptoService.decrypt(req.jwt.user))
-  },
+  getCurrentUserData: (req) => JSON.parse(decrypt(req.jwt.user)),
 
-  sign: (userData) => jwtGenerator.sign({ user:  cryptoService.encrypt(JSON.stringify(userData)) }, privateKey, {
-    jwtid: generateToken(), noTimestamp: false, algorithm: 'RS512', expiresIn: expirationTime,
-  }),
+  sign: (userData) => jwtGenerator.sign({ user: encrypt(JSON.stringify(userData)) },
+    { key: privateKey, passphrase: process.env.CRYPTO_KEY_PAIR_PASSWORD }, {
+      jwtid: generateToken(), noTimestamp: false, algorithm: 'RS512', expiresIn: expirationTime,
+    }),
 
   decode: (jwt) => jwtGenerator.verify(jwt, publicKey, { algorithms: 'RS512' }),
 

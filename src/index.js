@@ -1,9 +1,15 @@
-require('dotenv').config();
-const app = require('./app');
+require('dotenv').config({ path: process.env.NODE_ENV === 'local' ? '.env.local' : '.env' });
+const fs = require('fs');
+const path = require('path');
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  /* eslint-disable no-console */
-  console.log(`Listening: http://localhost:${port}`);
-  /* eslint-enable no-console */
-});
+const keyPath = process.env.KEYS_PATH;
+const privKeyFile = path.join(keyPath, process.env.KEYS_PRIVATE_FILE);
+const publKeyFile = path.join(keyPath, process.env.KEYS_PUBLIC_FILE);
+
+if (!fs.existsSync(keyPath) || !fs.existsSync(privKeyFile) || !fs.existsSync(publKeyFile)) {
+  throw new Error(`Crypto Keys not found, please run command 'npm run keygen' to generate a new key or put existent key files on ${path.resolve(keyPath)}`);
+}
+
+const server = require('./server');
+
+server.start();

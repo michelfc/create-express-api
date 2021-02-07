@@ -2,7 +2,7 @@
 function errorHandler(err, req, res, next) {
   /* eslint-enable no-unused-vars */
   if (err.name === 'UnauthorizedError') {
-    return (res.status(401).send({ message: err.message }));
+    res.status(401).send({ message: err.message });
   } else {
     const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
     res.status(statusCode);
@@ -15,5 +15,5 @@ function errorHandler(err, req, res, next) {
 }
 
 module.exports = {
-  errorHandler
+  errorHandler,
 };

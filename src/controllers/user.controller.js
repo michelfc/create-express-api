@@ -2,7 +2,7 @@ const express = require('express');
 const jwtService = require('../services/jwt.service');
 
 async function getCurrentUser(req, res, next) {
-  let user = jwtService.getCurrentUserData(req);
+  const user = jwtService.getCurrentUserData(req);
   res.json(user);
 }
 
